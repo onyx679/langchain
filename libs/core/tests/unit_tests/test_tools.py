@@ -3418,6 +3418,33 @@ def test_filter_tool_runtime_directly_injected_arg() -> None:
     assert "runtime" not in captured
 
 
+def test_base_tool_subclass_receives_directly_injected_runtime() -> None:
+    """Test BaseTool subclasses can receive directly injected runtime args."""
+
+    class Runtime(_DirectlyInjectedToolArg):
+        def __init__(self, tool_call_id: str) -> None:
+            self.tool_call_id = tool_call_id
+
+    class MultiplyInput(BaseModel):
+        a: int
+        b: int
+
+    class MultiplyTool(BaseTool):
+        name: str = "multiply"
+        description: str = "Multiply two numbers."
+        args_schema: type[BaseModel] = MultiplyInput
+
+        def _run(self, a: int, b: int, runtime: Runtime) -> int:
+            assert runtime.tool_call_id == "call_1"
+            return a * b
+
+    tool_ = MultiplyTool()
+    runtime = Runtime(tool_call_id="call_1")
+
+    assert "runtime" in tool_._injected_args_keys
+    assert tool_.invoke({"a": 2, "b": 3, "runtime": runtime}) == 6
+
+
 # Custom directly injected arg type (similar to ToolRuntime)
 class _CustomRuntime(_DirectlyInjectedToolArg):
     """Custom runtime info injected at tool call time."""

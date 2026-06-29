@@ -706,8 +706,11 @@ class ChildTool(BaseTool):
 
     @functools.cached_property
     def _injected_args_keys(self) -> frozenset[str]:
-        # Base implementation doesn't manage injected args
-        return _EMPTY_SET
+        return frozenset(
+            k
+            for k, v in signature(self._run).parameters.items()
+            if _is_injected_arg_type(v.annotation)
+        )
 
     # --- Runnable ---
 
