@@ -170,6 +170,13 @@ class HuggingFacePipeline(BaseLLM):
             if not is_optimum_intel_available():
                 raise ImportError(err_msg)
 
+            if backend == "ipex" and is_optimum_intel_version(">=", "2.0"):
+                msg = (
+                    "Backend: ipex requires optimum-intel<2.0 because "
+                    "optimum-intel v2 removes the IPEX model classes."
+                )
+                raise ImportError(msg)
+
             # TODO: upgrade _MIN_OPTIMUM_VERSION to 1.22 after release
             min_optimum_version = (
                 "1.22"

@@ -78,6 +78,13 @@ class HuggingFaceEmbeddings(BaseModel, Embeddings):
                 msg = f"Backend: ipex {IMPORT_ERROR.format('optimum[ipex]')}"
                 raise ImportError(msg)
 
+            if is_optimum_intel_version(">=", "2.0"):
+                msg = (
+                    "Backend: ipex requires optimum-intel<2.0 because "
+                    "optimum-intel v2 removes the IPEX sentence transformer class."
+                )
+                raise ImportError(msg)
+
             if is_optimum_intel_version("<", _MIN_OPTIMUM_VERSION):
                 msg = (
                     f"Backend: ipex requires optimum-intel>="
